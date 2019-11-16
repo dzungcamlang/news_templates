@@ -1,0 +1,10 @@
+<!doctype HTML>
+<html>
+<head></head>
+<body>
+<h1>Fox</h1>
+{% for fox_page in fox_pages %}
+<a href='/fox/{{ fox_page.headline | urlencode }}'>{{ fox_page.headline }}</a>
+{% endfor %}
+</body>
+</html>
