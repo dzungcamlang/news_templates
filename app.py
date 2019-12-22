@@ -1,7 +1,8 @@
-from flask import Flask, render_template, Markup
+from flask import Flask, render_template, Markup, Response, send_file, make_response
 from flask_pymongo import PyMongo
 from settings import APP_ROOT, APP_ARTICLES_CACHE
 import os
+import email
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/fake_news'
@@ -10,9 +11,11 @@ mongo = PyMongo(app)
 @app.route('/')
 def index():
     foxnews_pages = list(mongo.db.pages.find({'news_source':'foxnews'}))
+    
     cached_page_files = [file.casefold() for file in os.listdir(APP_ARTICLES_CACHE)]
     all_articles = mongo.db.pages.find()
-    cached_articles = [article for article in all_articles if article['md5'].casefold() in cached_page_files]
+    
+    cached_articles = [article for article in all_articles if '{}.mhtml'.format(article['md5'].casefold()) in cached_page_files]
     return render_template('index.html', fox_pages=foxnews_pages, cached_articles = cached_articles)
     
 @app.route('/fox')
@@ -28,6 +31,13 @@ def fox(headline=None):
     
 @app.route('/cached/<hash>')
 def cached(hash):
-    with open(os.path.join(APP_ARTICLES_CACHE, hash.lower()), 'r') as f:
-        html = f.read()
-    return html
+    response = make_response(send_file(os.path.join(APP_ARTICLES_CACHE, '{}.mhtml'.format(hash.upper())), as_attachment=True, mimetype='multipart/related'))
+    # response.headers['Content-Disposition'] = 'inline'
+    return response
+    
+    # import pdb; pdb.set_trace()
+    # return str(message)
+    # htmls = [part for part in message.walk() if part.get_content_type() == 'text/html']
+    # return htmls[0].get_payload(decode=True)
+    # stuff = MimeHtmlParser.parse_file(os.path.join(APP_ARTICLES_CACHE, hash.upper()))
+    # return stuff.parts[0].content
