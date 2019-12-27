@@ -16,7 +16,12 @@ def _makeRegistrar():
 
 
 class ArticleParser():
-    required_fields = ['headline', 'date_published', 'author', 'image_url', 'article_body']
+    required_fields = [
+        'headline', 
+        # 'date_published', 
+        # 'author', 
+        'image_url', 
+        'article_body']
     
     def __init__(self):
         self.create_registers()
@@ -250,14 +255,223 @@ class NewYorkTimesParser(ArticleParser):
         def article_body(soup):
             return str(soup.select('section[itemprop="articleBody"] p'))
         
+class AssociatedPressParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @date_published_reg
+        def dp_1(soup):
+            # <meta data-rh="true" property="article:published_time" content="2019-11-01T21:50:58Z"> 
+            return soup.select_one('meta[property="article:published_time"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+            
+        # @author_reg
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <div class="Article" data-key="article">
+            return str(soup.select('[data-key="article"] p'))
+            
+class ReutersParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+            
+        @date_published_reg
+        def dp_1(soup):
+            # <meta data-rh="true" property="article:published_time" content="2019-11-01T21:50:58Z"> 
+            return soup.select_one('meta[property="og:article:published_time"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <div class="Article" data-key="article">
+            return str(soup.select('.StandardArticleBody_body p'))
+            
+class TheAtlanticParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+            
+        @date_published_reg
+        def dp_1(soup):
+            # <meta data-rh="true" property="article:published_time" content="2019-11-01T21:50:58Z"> 
+            return soup.select_one('meta[property="article:published_time"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('section[itemprop="articleBody"] p'))
+            
+class WashingtonExaminerParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+            
+        @date_published_reg
+        def dp_1(soup):
+            # <meta data-rh="true" property="article:published_time" content="2019-11-01T21:50:58Z"> 
+            return soup.select_one('meta[property="article:published_time"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('[itemprop="articleBody"] p'))
 
+class WashingtonTimesParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('.storyareawrapper p'))
+            
+class YahooNewsParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('[itemprop="articleBody"] p'))
+
+class TheHillParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('.content-wrp p'))
+
+
+class ABCNewsParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('article p'))
  
-wapo_parser = WapoParser()
-foxnews_parser = FoxNewsParser()
-newyorktimes_parser = NewYorkTimesParser()
-
 parser_map = {
-    'Washington Post': wapo_parser,
-    'Fox Online News': foxnews_parser,
-    'New York Times': newyorktimes_parser,
+    'Washington Post': WapoParser(),
+    'Fox Online News': FoxNewsParser(),
+    'New York Times': NewYorkTimesParser(),
+    'Associated Press': AssociatedPressParser(),
+    'Reuters': ReutersParser(),
+    'The Atlantic': TheAtlanticParser(),
+    'Washington Examiner': WashingtonExaminerParser(),
+    'Washington Times': WashingtonTimesParser(),
+    'Yahoo! News': YahooNewsParser(),
+    'The Hill': TheHillParser(),
+    'ABC News': ABCNewsParser()
 }

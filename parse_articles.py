@@ -19,7 +19,7 @@ db = client.fake_news
 # load values from google-sheet
 #
 
-refresh_articles = True
+refresh_articles = False
 if refresh_articles or not os.path.exists('articles.csv'):
     from authenticate import authenticate 
     credentials = authenticate()
@@ -42,23 +42,26 @@ these_sources = [
     # 'Washington Post', 
     # 'Fox Online News',
     # 'New York Times',
-    'Washington Examiner',
-    'The Hill',
-    'HuffPost',
+    # 'Washington Examiner',
+    # 'The Hill',
+    'ABC News'
+    # 'Associated Press'
     ]
     
 these_topics = [
-    '5. Healthcare'
+    'Healthcare'
 ]
 
-# do_these = articles_with_url[articles_with_url['Source'].isin(these_sources)]
-do_these = articles_with_url[articles_with_url['Topic'].isin(these_topics)]
+do_these = articles_with_url[articles_with_url['Source'].isin(these_sources)]
+# do_these = articles_with_url[articles_with_url['Topic'].isin(these_topics)]
+# do_these = articles_with_url
 # import pdb; pdb.set_trace()
 
 from article_parsers import parser_map
 
 for index, do_this in do_these.iterrows():
     url = do_this['ArticleUrl']
+    print('Parsing article {}'.format(url))
     url_hash = hashlib.md5(url.encode()).hexdigest().upper()
     query = { '_id': url_hash }
     
@@ -100,6 +103,3 @@ for index, do_this in do_these.iterrows():
     except Exception as e:
         print('exception hit while parsing {} {}'.format(url, url_hash))
         raise e
-    
-    
-    

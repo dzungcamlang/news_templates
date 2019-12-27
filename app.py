@@ -19,15 +19,18 @@ def get_cached_articles():
 
 @app.route('/')
 @app.route('/groupby/<groupby>')
-def index(groupby='source'):
+@app.route('/groupby/<groupby>/filterby/<filterby>')
+def index(groupby='Source',filterby=None):
+    required_fields = ArticleParser.required_fields
+    
     cached_articles = get_cached_articles()
     
-    required_fields = ArticleParser.required_fields
+    if filterby:
+        cached_articles = [article for article in cached_articles if article[groupby] == filterby]
     
     return render_template('index_by_{}.html'.format(groupby), 
         cached_articles = cached_articles, 
-        required_fields = required_fields, 
-        )
+        required_fields = required_fields)
     
 @app.route('/fox')
 @app.route('/fox/<headline>')
