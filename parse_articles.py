@@ -1,11 +1,13 @@
 #!/home/deargle/.virtualenvs/fake-news/bin/python
 import requests
 from bs4 import BeautifulSoup
+import email
 import json
 import hashlib
-from os import path
+import os
 import sys
 import gspread
+from settings import APP_ARTICLES_CACHE 
 from pymongo import MongoClient, ReturnDocument
 client = MongoClient()
 
@@ -17,8 +19,8 @@ db = client.fake_news
 # load values from google-sheet
 #
 
-refresh_articles = False
-if refresh_articles or not path.exists('articles.csv'):
+refresh_articles = True
+if refresh_articles or not os.path.exists('articles.csv'):
     from authenticate import authenticate 
     credentials = authenticate()
     gc = gspread.authorize(credentials)
@@ -35,14 +37,29 @@ else:
 #(Pdb) articles.columns
 #Index(['Leaning', 'Source', 'Topic', 'Allsides', 'Article', 'md5'], dtype='object')
 articles_with_url = articles[articles.ArticleUrl.notnull()]
-wapo_articles = articles_with_url[articles.Source == 'Washington Post']
-do_these = wapo_articles
+# wapo_articles = articles_with_url[articles.Source == 'Washington Post']
+these_sources = [ 
+    # 'Washington Post', 
+    # 'Fox Online News',
+    # 'New York Times',
+    'Washington Examiner',
+    'The Hill',
+    'HuffPost',
+    ]
+    
+these_topics = [
+    '5. Healthcare'
+]
+
+# do_these = articles_with_url[articles_with_url['Source'].isin(these_sources)]
+do_these = articles_with_url[articles_with_url['Topic'].isin(these_topics)]
+# import pdb; pdb.set_trace()
 
 from article_parsers import parser_map
 
 for index, do_this in do_these.iterrows():
     url = do_this['ArticleUrl']
-    url_hash = hashlib.md5(url.encode()).hexdigest()
+    url_hash = hashlib.md5(url.encode()).hexdigest().upper()
     query = { '_id': url_hash }
     
     # update the mongo record with any changes from the google sheet
@@ -56,13 +73,16 @@ for index, do_this in do_these.iterrows():
     record = db.pages.find_one(query)
     
     if 'html' not in record:
-        article_cache_path = 'article_pages/{}'.format(url_hash)
-        if not path.exists(article_cache_path):
-            pass
+        article_cache_filepath = os.path.join(APP_ARTICLES_CACHE, '{}.mhtml'.format(url_hash))
+        if not os.path.exists(article_cache_filepath):
+            print('no cached article found, skipping, for {} {}'.format(article_cache_filepath, url))
+            continue
             # raise Exception('html for record {} not set and cached html not found in article_pages dir'.format(url_hash))
         else:
-            with open(article_cache_path.format(url_hash, 'r')) as f:
-                html = f.read()
+            with open(article_cache_filepath, 'r') as f:
+                message = email.message_from_file(f)
+            html_parts = [ part for part in message.walk() if part.get_content_type() == 'text/html' ]
+            html = html_parts[0].get_payload(decode=True)
             record = db.pages.find_one_and_update(
                 query,
                 { '$set': { 'html' : html } },
@@ -70,10 +90,16 @@ for index, do_this in do_these.iterrows():
             )
     
     # parse, and update database record...
-    # parsed_fields = parser_map[record['Source']].parse(record['html'])
-    # db.pages.update_one(
-        # query, 
-        # { '$set': parsed_fields }
-    # )
+    try:
+        parsed_fields = parser_map[record['Source']].parse(record['html'])
+        parsed_fields.update({'parsed': True})
+        db.pages.update_one(
+            query, 
+            { '$set': parsed_fields }
+        )
+    except Exception as e:
+        print('exception hit while parsing {} {}'.format(url, url_hash))
+        raise e
+    
     
     

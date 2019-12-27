@@ -1,22 +1,33 @@
 from flask import Flask, render_template, Markup, Response, send_file, make_response
 from flask_pymongo import PyMongo
 from settings import APP_ROOT, APP_ARTICLES_CACHE
+from article_parsers import ArticleParser
 import os
 import email
+from itertools import groupby
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/fake_news'
 mongo = PyMongo(app)
 
-@app.route('/')
-def index():
-    foxnews_pages = list(mongo.db.pages.find({'news_source':'foxnews'}))
-    
+def get_cached_articles():
     cached_page_files = [file.casefold() for file in os.listdir(APP_ARTICLES_CACHE)]
-    all_articles = mongo.db.pages.find()
+    all_articles = list(mongo.db.pages.find())
     
     cached_articles = [article for article in all_articles if '{}.mhtml'.format(article['md5'].casefold()) in cached_page_files]
-    return render_template('index.html', fox_pages=foxnews_pages, cached_articles = cached_articles)
+    return cached_articles
+
+@app.route('/')
+@app.route('/groupby/<groupby>')
+def index(groupby='source'):
+    cached_articles = get_cached_articles()
+    
+    required_fields = ArticleParser.required_fields
+    
+    return render_template('index_by_{}.html'.format(groupby), 
+        cached_articles = cached_articles, 
+        required_fields = required_fields, 
+        )
     
 @app.route('/fox')
 @app.route('/fox/<headline>')
