@@ -461,7 +461,105 @@ class ABCNewsParser(ArticleParser):
         def article_body(soup):
             # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
             return str(soup.select('article p'))
- 
+
+class WallStreetJournalParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('.article-content p'))
+
+class VoxParser(ArticleParser):
+    def _populate_registers(self,
+        image_url_reg, 
+        author_reg, 
+        date_published_reg, 
+        headline_reg, 
+        article_body_reg):
+        
+        @headline_reg
+        def headline_1(soup):
+            # <meta data-rh="true" property="og:title" content="Warren vows no middle class tax hike for $20T health plan">
+            return soup.select_one('meta[property="og:title"]').attrs['content']
+        
+        @image_url_reg
+        def img_1(soup):
+            # <meta data-rh="true" property="og:image" content="https://storage.googleapis.com/afs-prod/media/b91763af9125419f99c733a9eb887eab/3000.jpeg">
+            return soup.select_one('meta[property="og:image"]').attrs['content']
+        
+        @article_body_reg
+        def article_body(soup):
+            # <section class="l-article__section s-cms-content" itemprop="articleBody" id="article-section-0">  
+            return str(soup.select('.c-entry-content p'))
+            
+class TheFederalistParser(VoxParser):
+    pass
+    
+class BBCNewsParser(VoxParser):
+    pass
+
+class MotherJonesParser(VoxParser):
+    pass
+
+class TheDailyCallerParser(VoxParser):
+    pass
+
+class ColumbiaJournalismReviewParser(VoxParser):
+    pass
+
+class CBSNewsParser(VoxParser):
+    pass
+
+class MarketWatchParser(VoxParser):
+    pass
+
+class NPROnlineNewsParser(VoxParser):
+    pass
+
+class NewYorkPostParser(VoxParser):
+    pass
+
+class BreitbartNewsParser(VoxParser):
+    pass
+
+class BuzzFeedNewsParser(VoxParser):
+    pass
+
+class NationalReviewParser(VoxParser):
+    pass
+
+class RollCallParser(VoxParser):
+    pass
+
+class USATodayParser(VoxParser):
+    pass
+
+class ReasonParser(VoxParser):
+    pass
+
+class ChristianScienceMonitorParser(VoxParser):
+    pass
+
+class DemocracyNowParser(VoxParser):
+    pass
+    
+
 parser_map = {
     'Washington Post': WapoParser(),
     'Fox Online News': FoxNewsParser(),
@@ -473,5 +571,24 @@ parser_map = {
     'Washington Times': WashingtonTimesParser(),
     'Yahoo! News': YahooNewsParser(),
     'The Hill': TheHillParser(),
-    'ABC News': ABCNewsParser()
+    'ABC News': ABCNewsParser(),
+    'Wall Street Journal': WallStreetJournalParser(),
+    'Vox': VoxParser(),
+    'The Federalist': TheFederalistParser(),
+    'BBC News': BBCNewsParser(),
+    'Mother Jones': MotherJonesParser(),
+    'The Daily Caller': TheDailyCallerParser(),
+    'Columbia Journalism Review': ColumbiaJournalismReviewParser(),
+    'CBS News': CBSNewsParser(),
+    'MarketWatch': MarketWatchParser(),
+    'NPR Online News': NPROnlineNewsParser(),
+    'New York Post': NewYorkPostParser(),
+    'Breitbart News': BreitbartNewsParser(),
+    'BuzzFeed News': BuzzFeedNewsParser(),
+    'National Review': NationalReviewParser(),
+    'Roll Call': RollCallParser(),
+    'USA Today': USATodayParser(),
+    'Reason': ReasonParser(),
+    'Christian Science Monitor': ChristianScienceMonitorParser(),
+    'Democracy Now': DemocracyNowParser()
 }

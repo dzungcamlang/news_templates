@@ -44,17 +44,21 @@ these_sources = [
     # 'New York Times',
     # 'Washington Examiner',
     # 'The Hill',
-    'ABC News'
+    # 'ABC News'
     # 'Associated Press'
+    # 'Wall Street Journal'
+    'Vox',
+    'The Federalist',
+    'BBC News'
     ]
     
 these_topics = [
     'Healthcare'
 ]
 
-do_these = articles_with_url[articles_with_url['Source'].isin(these_sources)]
+# do_these = articles_with_url[articles_with_url['Source'].isin(these_sources)]
 # do_these = articles_with_url[articles_with_url['Topic'].isin(these_topics)]
-# do_these = articles_with_url
+do_these = articles_with_url
 # import pdb; pdb.set_trace()
 
 from article_parsers import parser_map
